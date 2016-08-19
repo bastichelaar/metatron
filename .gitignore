@@ -1,0 +1,9 @@
+build
+dist
+.eggs
+*.egg-info
+*.pyc
+.cache
+.idea
+*.iml
+.coverage

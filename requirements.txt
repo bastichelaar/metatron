@@ -1,0 +1,6 @@
+pip
+py
+pytest
+pytest-cov
+click
+pyhocon
