@@ -16,10 +16,11 @@ def generate(pull, gcloud, image):
     if pull:
         dockerPull(image, gcloud)
 
-    metadata = getImageMetadata(image)
+    metadata = imageMetadata(image)
 
-    click.echo('Metadata: %s' % metadata)
-
+    click.echo('Attributes:    %s' % metadata.get_config('meta.attributes').items())
+    click.echo('Port mappings: %s' % metadata.get_config('meta.ports').items())
+    click.echo('Checks:        %s' % metadata.get_config('meta.checks').items())
 
 
 

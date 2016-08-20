@@ -8,7 +8,7 @@ def dockerPull(image, gcloud):
     else:
         return subprocess.check_call(['docker', 'pull', image])
 
-def getImageMetadata(image):
+def dockerInspect(image):
     template = """{{range $key, $value := .Config.Labels}}
 {{$key}}="{{$value}}"{{end}}"""
 
