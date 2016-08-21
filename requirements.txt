@@ -4,3 +4,4 @@ pytest
 pytest-cov
 click
 pyhocon
+jinja2

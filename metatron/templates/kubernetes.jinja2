@@ -1,0 +1,63 @@
+{#
+  Service descriptor template for kubernetes.
+  Renders YAML
+
+  Args:
+  - metadata (pyhocon.ConfigTree)
+
+#}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ metadata.get_string('meta.attributes.id') }}
+  labels:
+{% for key, value in metadata.get_config('meta.attributes').items() %}
+    meta.attributes.{{ key }}: "{{ value }}"
+{% endfor %}
+spec:
+  selector:
+    service: {{ metadata.get_string('meta.attributes.id') }}
+  type: ClusterIP
+  ports:
+{% for mapping in metadata.get_config('meta.ports').iterkeys() %}
+{% set config = metadata.get_config('meta.ports')[mapping] %}
+  - name: {{ mapping }}
+    port: {{ config['service'] }}
+    targetPort: {{ config['container'] }}
+{% endfor %}
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ metadata.get_string('meta.attributes.id') }}
+spec:
+  replicas: 1
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        service: "{{ metadata.get_string('meta.attributes.id') }}"
+{% for key, value in metadata.get_config('meta.attributes').items() %}
+        meta.attributes.{{ key }}: "{{ value }}"
+{% endfor %}
+{# ${asIndentedYamlSection("annotations", annotations, 6)} #}
+    spec:
+      containers:
+      - image: {{ metadata.get_string('meta.attributes.image') }}
+        name: {{ metadata.get_string('meta.attributes.id') }}
+        ports:
+{% for mapping in metadata.get_config('meta.ports').iterkeys() %}
+{% set config = metadata.get_config('meta.ports')[mapping] %}
+        - name: {{ mapping }}
+          containerPort: {{ config['container'] }}
+{% endfor %}
+        livenessProbe:
+          httpGet:
+            path: {{ metadata.get_string('meta.checks.health.endpoint') }}
+            port: {{ metadata.get_string('meta.checks.health.port') }}
+          periodSeconds: 30
+          initialDelaySeconds: 15
+          timeoutSeconds: 2
+          successThreshold: 1
+          failureThreshold: 3

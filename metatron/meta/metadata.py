@@ -8,16 +8,17 @@ from .docker import dockerInspect
 def imageMetadata(image):
     inspected = dockerInspect(image)
     parsed = ConfigFactory.parse_string(inspected)
-    name, version = imageNameAndVersion(image)
+    registry, project, version = imageNameAndVersion(image)
 
-    parsed.put('meta.attributes.name', name)
-    parsed.put('meta.attributes.version', version)
     parsed.put('meta.attributes.image', image)
+    parsed.put('meta.attributes.project', project)
+    parsed.put('meta.attributes.version', version)
+    parsed.put('meta.attributes.registry', registry)
 
     return parsed
 
 def imageNameAndVersion(image):
-    pattern = re.compile('(.+):(.+)')
+    pattern = re.compile('(?:(.+)/)?(.+):(.+)')
     matched = pattern.match(image)
 
     # TODO: raise an error if matched is None
