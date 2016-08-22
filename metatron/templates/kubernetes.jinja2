@@ -5,31 +5,44 @@
   Args:
   - metadata (pyhocon.ConfigTree)
 
+  TODO:
+  - pass through of annotations (separate namespace?)
+  - optional blocks, i.e. if health check defined, add it, etc.
+  - error handling
+  - add other deploy time metadata annotations (build time?, jenkins build number?)
+  - add metadata support for number of replicas
+  - pre-deploy commands (i.e. topic creation, index creation)
+  - readiness checks
+  - post-deploy tasks?
+  - rolling upgrades
+  - add k8s resource limits
+  - horizontal pod autoscaling
+
 #}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ metadata.get_string('meta.attributes.id') }}
+  name: {{ metadata['meta.attributes.id'] }}
   labels:
-{% for key, value in metadata.get_config('meta.attributes').items() %}
+{% for key, value in metadata['meta.attributes'].items() %}
     meta.attributes.{{ key }}: "{{ value }}"
 {% endfor %}
 spec:
   selector:
-    service: {{ metadata.get_string('meta.attributes.id') }}
+    service: {{ metadata['meta.attributes.id'] }}
   type: ClusterIP
   ports:
-{% for mapping in metadata.get_config('meta.ports').iterkeys() %}
-{% set config = metadata.get_config('meta.ports')[mapping] %}
-  - name: {{ mapping }}
-    port: {{ config['service'] }}
-    targetPort: {{ config['container'] }}
+{% for port in metadata['meta.ports'].iterkeys() %}
+{% set mapping = metadata['meta.ports'][port] %}
+  - name: {{ port }}
+    port: {{ mapping['service'] }}
+    targetPort: {{ mapping['container'] }}
 {% endfor %}
 ---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: {{ metadata.get_string('meta.attributes.id') }}
+  name: {{ metadata['meta.attributes.id'] }}
 spec:
   replicas: 1
   strategy:
@@ -37,25 +50,25 @@ spec:
   template:
     metadata:
       labels:
-        service: "{{ metadata.get_string('meta.attributes.id') }}"
-{% for key, value in metadata.get_config('meta.attributes').items() %}
+        service: "{{ metadata['meta.attributes.id'] }}"
+{% for key, value in metadata['meta.attributes'].items() %}
         meta.attributes.{{ key }}: "{{ value }}"
 {% endfor %}
 {# ${asIndentedYamlSection("annotations", annotations, 6)} #}
     spec:
       containers:
-      - image: {{ metadata.get_string('meta.attributes.image') }}
-        name: {{ metadata.get_string('meta.attributes.id') }}
+      - image: {{ metadata['meta.attributes.image'] }}
+        name: {{ metadata['meta.attributes.id'] }}
         ports:
-{% for mapping in metadata.get_config('meta.ports').iterkeys() %}
-{% set config = metadata.get_config('meta.ports')[mapping] %}
-        - name: {{ mapping }}
-          containerPort: {{ config['container'] }}
+{% for port in metadata['meta.ports'].iterkeys() %}
+{% set mapping = metadata['meta.ports'][port] %}
+        - name: {{ port }}
+          containerPort: {{ mapping['container'] }}
 {% endfor %}
         livenessProbe:
           httpGet:
-            path: {{ metadata.get_string('meta.checks.health.endpoint') }}
-            port: {{ metadata.get_string('meta.checks.health.port') }}
+            path: {{ metadata['meta.checks.health.endpoint'] }}
+            port: {{ metadata['meta.checks.health.port'] }}
           periodSeconds: 30
           initialDelaySeconds: 15
           timeoutSeconds: 2

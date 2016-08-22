@@ -5,6 +5,8 @@ import click
 from metatron.meta import *
 from metatron.descriptors import *
 
+from pyhocon import *
+
 @click.command()
 # @click.option('--template', default="kubernetes", help='The deployment descriptor template to use.')
 @click.option('--pull', is_flag=True, default=False, help="Perform a docker pull before attempting to read image metadata. Defaults to False.")
@@ -21,26 +23,22 @@ def generate(pull, gcloud, image):
 
     metadata = imageMetadata(image) # TODO: validate some actual metadata was found
 
-    click.echo('Project:       %s' % project)
-    click.echo('Name:          %s' % metadata.get_string('meta.attributes.id'))
-    click.echo('Version:       %s' % version)
-    click.echo('Attributes:    %s' % metadata.get_config('meta.attributes').items())
-    click.echo('Health check:  %s' % metadata.get_config('meta.checks.health').items())
-    click.echo('Port mappings: %s' % metadata.get_config('meta.ports').items())
+    click.echo('Project: %s' % project)
+    click.echo('Name:    %s' % metadata.get_string('meta.attributes.id'))
+    click.echo('Version: %s' % version)
+    click.echo('')
 
-    descriptor = descriptorFor('kubernetes', metadata)
+    # click.echo('')
+    # flattened = flatten(metadata, keyFilter = lambda k: not(k.startswith('attributes')))
+    # for annotation in flattened:
+    #     click.echo('%s' % annotation)
 
-    click.echo('Descriptor:\n\n%s' % descriptor)
+    click.echo('Descriptor:\n\n%s' % descriptorFor('kubernetes', metadata))
+
 
     # TODO:
-    # - generate the k8s file(s)
-    #   - labels
-    #   - annotations
-    #   - health checks
-    #   - port mappings
     # - add option to specify output directory? output file name?
-    # - support more metadata features
-
+    #
     # Maybe later:
     # - output format option? (yaml or json)
     # - specify a kubernetes label/annotation namespace? Of make this optional and have a default?

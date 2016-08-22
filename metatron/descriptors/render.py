@@ -9,27 +9,3 @@ def descriptorFor(template, metadata):
     template = env.get_template('%s.jinja2' % template)
 
     return template.render(metadata=metadata)
-
-
-
-
-
-#   portMappings = getPortMappings(annotations)
-#   servicePorts = portMappings.collect { name, mappings ->
-#     """\
-#   - name: ${name}
-#     port: ${mappings['service']}
-#     targetPort: ${mappings['container']}"""
-#   }
-#   podPorts = portMappings.collect { name, mappings ->
-#     """\
-#         - name: ${name}
-#           containerPort: ${mappings['container']}"""
-#   }
-
-#   // TODO:
-#   // - add other deploy time metadata annotations (build time?, jenkins build number?)
-#   // - add metadata support for number of replicas
-
-#   """\
-#   """
