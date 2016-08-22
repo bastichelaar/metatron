@@ -1,7 +1,7 @@
 # Metatron
 
 :construction: **WARNING:** :construction:
-> This repository is extremely under construction!
+> This repository is extremely under construction!<br/>
 > Nothing will probably do what you think it does and no metadata model has been finislized yet!
 > Please feel free to peruse the code but I'd strongly recommend not using this for anything whatsoever!
 
