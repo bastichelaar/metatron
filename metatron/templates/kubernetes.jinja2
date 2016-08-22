@@ -27,6 +27,7 @@ metadata:
 {% for key, value in metadata['meta.attributes'].items() %}
     meta.attributes.{{ key }}: "{{ value }}"
 {% endfor %}
+{# TODO: insert annotations section #}
 spec:
   selector:
     service: {{ metadata['meta.attributes.id'] }}
@@ -54,7 +55,7 @@ spec:
 {% for key, value in metadata['meta.attributes'].items() %}
         meta.attributes.{{ key }}: "{{ value }}"
 {% endfor %}
-{# ${asIndentedYamlSection("annotations", annotations, 6)} #}
+{# TODO: insert annotations section #}
     spec:
       containers:
       - image: {{ metadata['meta.attributes.image'] }}
